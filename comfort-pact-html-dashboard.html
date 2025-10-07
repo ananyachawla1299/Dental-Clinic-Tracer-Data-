@@ -1,0 +1,665 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pre-education Comfort PACT Benchmarking</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+            padding: 2rem;
+            color: #1e293b;
+        }
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+        .header {
+            text-align: center;
+            padding: 2rem 0;
+            margin-bottom: 2rem;
+        }
+        .header h1 {
+            font-size: 2.5rem;
+            color: #1e293b;
+            margin-bottom: 0.5rem;
+        }
+        .header p {
+            font-size: 1.25rem;
+            color: #64748b;
+        }
+        .header-line {
+            width: 100px;
+            height: 4px;
+            background: #14b8a6;
+            margin: 1rem auto 0;
+        }
+        .metrics-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+        .metric-card {
+            background: white;
+            padding: 1.5rem;
+            border-radius: 12px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            border-left: 4px solid;
+        }
+        .metric-card.teal { border-color: #14b8a6; }
+        .metric-card.slate { border-color: #64748b; }
+        .metric-card.indigo { border-color: #6366f1; }
+        .metric-label {
+            font-size: 0.875rem;
+            color: #64748b;
+            margin-bottom: 0.5rem;
+        }
+        .metric-value {
+            font-size: 2.5rem;
+            font-weight: bold;
+        }
+        .metric-value.teal { color: #14b8a6; }
+        .metric-value.slate { color: #475569; }
+        .metric-value.indigo { color: #6366f1; }
+        .card {
+            background: white;
+            padding: 1.5rem;
+            border-radius: 12px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            margin-bottom: 2rem;
+        }
+        .card-title {
+            font-size: 1.125rem;
+            font-weight: bold;
+            color: #1e293b;
+            padding-bottom: 0.75rem;
+            border-bottom: 2px solid #14b8a6;
+            margin-bottom: 1rem;
+        }
+        .demographics-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 1.5rem;
+            font-size: 0.875rem;
+        }
+        .demo-item {
+            display: flex;
+            flex-direction: column;
+            gap: 0.25rem;
+        }
+        .demo-label {
+            font-weight: 600;
+            color: #64748b;
+            font-size: 0.75rem;
+            text-transform: uppercase;
+        }
+        .demo-value {
+            color: #475569;
+        }
+        .charts-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+        .summary-items {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+            padding-top: 1rem;
+        }
+        .summary-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0.75rem 1rem;
+            border-radius: 8px;
+            border: 1px solid;
+        }
+        .summary-item.high {
+            background: #f0fdf4;
+            border-color: #bbf7d0;
+        }
+        .summary-item.medium {
+            background: #fffbeb;
+            border-color: #fde68a;
+        }
+        .summary-item.low {
+            background: #fef2f2;
+            border-color: #fecaca;
+        }
+        .summary-label {
+            font-weight: 500;
+            color: #475569;
+        }
+        .summary-value {
+            font-size: 1.5rem;
+            font-weight: bold;
+        }
+        .summary-value.high { color: #10b981; }
+        .summary-value.medium { color: #f59e0b; }
+        .summary-value.low { color: #ef4444; }
+        .filters {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 1rem;
+            padding-bottom: 1rem;
+            border-bottom: 1px solid #e2e8f0;
+        }
+        .filter-group {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+        .filter-label {
+            font-size: 0.75rem;
+            font-weight: 600;
+            color: #64748b;
+        }
+        select {
+            padding: 0.5rem 1rem;
+            border: 1px solid #cbd5e1;
+            border-radius: 8px;
+            background: white;
+            font-size: 0.875rem;
+            cursor: pointer;
+        }
+        select:focus {
+            outline: 2px solid #14b8a6;
+            outline-offset: 2px;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.875rem;
+        }
+        thead {
+            background: #f1f5f9;
+        }
+        th {
+            padding: 0.75rem 1rem;
+            text-align: left;
+            font-weight: 600;
+            color: #475569;
+            cursor: pointer;
+            user-select: none;
+        }
+        th:hover {
+            background: #e2e8f0;
+        }
+        td {
+            padding: 0.75rem 1rem;
+            border-top: 1px solid #e2e8f0;
+        }
+        tr:hover {
+            background: #f8fafc;
+        }
+        .badge {
+            display: inline-block;
+            padding: 0.25rem 0.75rem;
+            border-radius: 9999px;
+            font-size: 0.75rem;
+            font-weight: 500;
+            border: 1px solid;
+        }
+        .badge.high {
+            background: #f0fdf4;
+            color: #15803d;
+            border-color: #bbf7d0;
+        }
+        .badge.medium {
+            background: #fffbeb;
+            color: #b45309;
+            border-color: #fde68a;
+        }
+        .badge.low {
+            background: #fef2f2;
+            color: #b91c1c;
+            border-color: #fecaca;
+        }
+        .compliance-high { color: #10b981; font-weight: 600; }
+        .compliance-medium { color: #f59e0b; font-weight: 600; }
+        .compliance-low { color: #ef4444; font-weight: 600; }
+        .priority-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(450px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+        .priority-card {
+            background: white;
+            padding: 1.5rem;
+            border-radius: 12px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            border-top: 4px solid;
+        }
+        .priority-card.gaps { border-color: #ef4444; }
+        .priority-card.strengths { border-color: #10b981; }
+        .priority-title {
+            font-size: 1.125rem;
+            font-weight: bold;
+            margin-bottom: 1rem;
+        }
+        .priority-title.gaps { color: #7f1d1d; }
+        .priority-title.strengths { color: #064e3b; }
+        .priority-items {
+            display: flex;
+            flex-direction: column;
+            gap: 0.75rem;
+        }
+        .priority-item {
+            padding: 1rem;
+            border-radius: 8px;
+            border: 1px solid;
+        }
+        .priority-item.gaps {
+            background: #fef2f2;
+            border-color: #fecaca;
+        }
+        .priority-item.strengths {
+            background: #f0fdf4;
+            border-color: #bbf7d0;
+        }
+        .priority-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: start;
+            margin-bottom: 0.5rem;
+        }
+        .priority-element {
+            font-size: 0.75rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+        .priority-element.gaps { color: #7f1d1d; }
+        .priority-element.strengths { color: #064e3b; }
+        .priority-value {
+            font-size: 1rem;
+            font-weight: bold;
+        }
+        .priority-value.gaps { color: #dc2626; }
+        .priority-value.strengths { color: #10b981; }
+        .priority-text {
+            font-size: 0.75rem;
+            line-height: 1.5;
+        }
+        .priority-text.gaps { color: #991b1b; }
+        .priority-text.strengths { color: #065f46; }
+        .filter-count {
+            font-size: 0.875rem;
+            color: #64748b;
+            margin-bottom: 1rem;
+        }
+        .filter-count strong {
+            color: #14b8a6;
+            font-weight: 600;
+        }
+        canvas {
+            max-height: 320px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>Pre-education Comfort PACT Benchmarking</h1>
+            <p>Dental Clinic</p>
+            <div class="header-line"></div>
+        </div>
+
+        <div class="metrics-grid">
+            <div class="metric-card teal">
+                <div class="metric-label">Overall Clinic Compliance</div>
+                <div class="metric-value teal">52.4%</div>
+            </div>
+            <div class="metric-card slate">
+                <div class="metric-label">Total Behavioral Metrics</div>
+                <div class="metric-value slate">23</div>
+            </div>
+            <div class="metric-card indigo">
+                <div class="metric-label">Total Observations</div>
+                <div class="metric-value indigo">22</div>
+            </div>
+        </div>
+
+        <div class="card">
+            <h2 class="card-title">Demographics</h2>
+            <div class="demographics-grid">
+                <div class="demo-item">
+                    <div class="demo-label">Developmental Status</div>
+                    <div class="demo-value">55% Neurodivergent</div>
+                    <div class="demo-value">45% Neurotypical</div>
+                </div>
+                <div class="demo-item">
+                    <div class="demo-label">Communication</div>
+                    <div class="demo-value">86% Verbally</div>
+                    <div class="demo-value">14% Nonverbally</div>
+                </div>
+                <div class="demo-item">
+                    <div class="demo-label">Interpreter</div>
+                    <div class="demo-value">5% Yes</div>
+                    <div class="demo-value">27% No</div>
+                    <div class="demo-value">68% N/A</div>
+                </div>
+                <div class="demo-item">
+                    <div class="demo-label">Age Groups</div>
+                    <div class="demo-value">27% (2-4 yrs)</div>
+                    <div class="demo-value">14% (5-7 yrs)</div>
+                    <div class="demo-value">59% (7+ yrs)</div>
+                </div>
+                <div class="demo-item" style="grid-column: span 2;">
+                    <div class="demo-label">Appointment Type</div>
+                    <div class="demo-value">49% New Patient | 50% Extractions/Restorations</div>
+                    <div class="demo-value">5% Hygiene | 5% Silver Diamine Application</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="charts-grid">
+            <div class="card">
+                <h2 class="card-title">Compliance Distribution</h2>
+                <canvas id="pieChart"></canvas>
+            </div>
+            <div class="card">
+                <h2 class="card-title">Metric Summary</h2>
+                <div class="summary-items">
+                    <div class="summary-item high">
+                        <span class="summary-label">High Compliance (80%+)</span>
+                        <span class="summary-value high">6</span>
+                    </div>
+                    <div class="summary-item medium">
+                        <span class="summary-label">Medium Compliance (50-79%)</span>
+                        <span class="summary-value medium">6</span>
+                    </div>
+                    <div class="summary-item low">
+                        <span class="summary-label">Low Compliance (Below 50%)</span>
+                        <span class="summary-value low">11</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="card">
+            <h2 class="card-title">Element-Level Compliance Performance</h2>
+            <canvas id="barChart"></canvas>
+            <div style="overflow-x: auto; margin-top: 1.5rem;">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Element</th>
+                            <th>Average Compliance</th>
+                            <th>Total Metrics</th>
+                        </tr>
+                    </thead>
+                    <tbody id="elementTable">
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <div class="card">
+            <h2 class="card-title">Behavioral Indicators</h2>
+            <div class="filters">
+                <div class="filter-group">
+                    <label class="filter-label">Filter by Element</label>
+                    <select id="elementFilter">
+                        <option value="All">All Elements</option>
+                        <option value="Preparation">Preparation</option>
+                        <option value="Communication">Communication</option>
+                        <option value="Comfort Positions">Comfort Positions</option>
+                        <option value="Alternate Focus">Alternate Focus</option>
+                        <option value="Medication">Medication</option>
+                    </select>
+                </div>
+                <div class="filter-group">
+                    <label class="filter-label">Filter by Compliance Level</label>
+                    <select id="levelFilter">
+                        <option value="All">All Levels</option>
+                        <option value="High">High (80%+)</option>
+                        <option value="Medium">Medium (50-79%)</option>
+                        <option value="Low">Low (Below 50%)</option>
+                    </select>
+                </div>
+            </div>
+            <div class="filter-count" id="filterCount"></div>
+            <div style="overflow-x: auto;">
+                <table>
+                    <thead>
+                        <tr>
+                            <th onclick="sortTable('element')">Element</th>
+                            <th>Behavioral Indicator</th>
+                            <th onclick="sortTable('compliance')">Compliance</th>
+                            <th>Level</th>
+                        </tr>
+                    </thead>
+                    <tbody id="indicatorTable">
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <div class="priority-grid">
+            <div class="priority-card gaps">
+                <h2 class="priority-title gaps">Critical Gaps (Below 20% Compliance)</h2>
+                <div class="priority-items" id="criticalGaps"></div>
+            </div>
+            <div class="priority-card strengths">
+                <h2 class="priority-title strengths">Strengths (100% Compliance)</h2>
+                <div class="priority-items" id="strengths"></div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        var elementData = [
+            { element: 'COMFORT POSITIONS', compliance: 72.8, metrics: 4 },
+            { element: 'MEDICATION', compliance: 60.6, metrics: 2 },
+            { element: 'COMMUNICATION', compliance: 60.5, metrics: 7 },
+            { element: 'PREPARATION', compliance: 42.8, metrics: 6 },
+            { element: 'ALTERNATE FOCUS', compliance: 25.3, metrics: 4 }
+        ];
+
+        var allIndicators = [
+            { element: 'Preparation', indicator: 'If met with questions, was the HCP able to sufficiently alleviate stress and concern using familiar words before the procedure?', compliance: 100, level: 'High' },
+            { element: 'Communication', indicator: 'Was the HCP able to pick up on non-verbal cues of discomfort in the patient or family behaviour?', compliance: 100, level: 'High' },
+            { element: 'Comfort Positions', indicator: 'Did the HCP offer a procedure appropriate and age appropriate comfort position for the patient?', compliance: 100, level: 'High' },
+            { element: 'Communication', indicator: 'Did the HCP use soft language and developmentally appropriate words to communicate with the patient?', compliance: 91, level: 'High' },
+            { element: 'Comfort Positions', indicator: 'Was a Protective Stabilization Board or other form of physical restraint used during the procedure?', compliance: 91, level: 'High' },
+            { element: 'Medication', indicator: 'Did the HCP present the medication in an age appropriate way?', compliance: 87.8, level: 'High' },
+            { element: 'Comfort Positions', indicator: 'Did the child appear physically relaxed once in position?', compliance: 75.3, level: 'Medium' },
+            { element: 'Communication', indicator: 'Did the HCP involved with the procedure attempt to lead with the OneVoice approach?', compliance: 64, level: 'Medium' },
+            { element: 'Preparation', indicator: 'Did the HCP explain what was going to happen during the appointment using developmentally appropriate language?', compliance: 59, level: 'Medium' },
+            { element: 'Alternate Focus', indicator: 'Did the HCP offer audio/visual alternate focus during the procedure?', compliance: 55, level: 'Medium' },
+            { element: 'Communication', indicator: 'Did the HCP effectively address the discomfort expressed through non-verbal cues by the patient or family?', compliance: 54, level: 'Medium' },
+            { element: 'Communication', indicator: 'Did the HCP build rapport through small talk or other comfort measures?', compliance: 50, level: 'Medium' },
+            { element: 'Preparation', indicator: 'Was the child shown any of the dental tools ahead of time to support familiarization?', compliance: 47.7, level: 'Low' },
+            { element: 'Communication', indicator: 'Was the child given the opportunity to say stop or pause during the procedure?', compliance: 46.8, level: 'Low' },
+            { element: 'Medication', indicator: 'Was there a discussion about pain expectation and management post-procedure?', compliance: 33.3, level: 'Low' },
+            { element: 'Preparation', indicator: 'After being brought to the dental chair, did the HCP ask if the patient or family had any questions?', compliance: 32, level: 'Low' },
+            { element: 'Alternate Focus', indicator: 'Was there a process of exploring alternate focus techniques for both the family and the patient before and during the procedure?', compliance: 28, level: 'Low' },
+            { element: 'Comfort Positions', indicator: 'If changes were observed during the procedure, did the HCP pause and address the change?', compliance: 25, level: 'Low' },
+            { element: 'Communication', indicator: 'Upon first contact with the family, did the HCP assisting the family introduce themselves?', compliance: 18, level: 'Low' },
+            { element: 'Alternate Focus', indicator: 'Did the HCP encourage caregivers to provide alternate focus and comfort?', compliance: 13.2, level: 'Low' },
+            { element: 'Preparation', indicator: 'Did the HCP ask the patient or caregiver about previous coping strategies that have worked out in the past?', compliance: 9.9, level: 'Low' },
+            { element: 'Preparation', indicator: 'Was a Child Life Specialist made available to the family?', compliance: 8.3, level: 'Low' },
+            { element: 'Alternate Focus', indicator: 'Did the dental team collaborate with the CLS to provide alternate focus?', compliance: 5, level: 'Low' }
+        ];
+
+        var filteredData = allIndicators.slice();
+        var sortDirection = { key: 'compliance', dir: 'desc' };
+
+        var pieCtx = document.getElementById('pieChart').getContext('2d');
+        new Chart(pieCtx, {
+            type: 'pie',
+            data: {
+                labels: ['High (80%+)', 'Medium (50-79%)', 'Low (Below 50%)'],
+                datasets: [{
+                    data: [6, 6, 11],
+                    backgroundColor: ['#10b981', '#f59e0b', '#ef4444']
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: true,
+                plugins: {
+                    legend: { position: 'bottom' }
+                }
+            }
+        });
+
+        var barCtx = document.getElementById('barChart').getContext('2d');
+        new Chart(barCtx, {
+            type: 'bar',
+            data: {
+                labels: elementData.map(function(d) { return d.element; }),
+                datasets: [{
+                    label: 'Compliance %',
+                    data: elementData.map(function(d) { return d.compliance; }),
+                    backgroundColor: '#14b8a6',
+                    borderRadius: 8
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: true,
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        max: 100,
+                        title: { display: true, text: 'Compliance %' }
+                    }
+                },
+                plugins: {
+                    legend: { display: false }
+                }
+            }
+        });
+
+        function getComplianceClass(compliance) {
+            if (compliance >= 80) return 'compliance-high';
+            if (compliance >= 50) return 'compliance-medium';
+            return 'compliance-low';
+        }
+
+        function renderElementTable() {
+            var tbody = document.getElementById('elementTable');
+            var html = '';
+            for (var i = 0; i < elementData.length; i++) {
+                var item = elementData[i];
+                html += '<tr><td><strong>' + item.element + '</strong></td>';
+                html += '<td class="' + getComplianceClass(item.compliance) + '">' + item.compliance + '%</td>';
+                html += '<td>' + item.metrics + '</td></tr>';
+            }
+            tbody.innerHTML = html;
+        }
+
+        function renderIndicatorTable() {
+            var tbody = document.getElementById('indicatorTable');
+            var html = '';
+            for (var i = 0; i < filteredData.length; i++) {
+                var item = filteredData[i];
+                html += '<tr><td><strong>' + item.element + '</strong></td>';
+                html += '<td>' + item.indicator + '</td>';
+                html += '<td class="' + getComplianceClass(item.compliance) + '">' + item.compliance + '%</td>';
+                html += '<td><span class="badge ' + item.level.toLowerCase() + '">' + item.level + '</span></td></tr>';
+            }
+            tbody.innerHTML = html;
+            
+            document.getElementById('filterCount').innerHTML = 'Showing <strong>' + filteredData.length + '</strong> of <strong>' + allIndicators.length + '</strong> indicators';
+        }
+
+        function renderPriorities() {
+            var gaps = allIndicators.filter(function(i) { return i.compliance < 20; });
+            var strengths = allIndicators.filter(function(i) { return i.compliance === 100; });
+
+            var gapsHtml = '';
+            for (var i = 0; i < gaps.length; i++) {
+                var item = gaps[i];
+                gapsHtml += '<div class="priority-item gaps">';
+                gapsHtml += '<div class="priority-header">';
+                gapsHtml += '<span class="priority-element gaps">' + item.element + '</span>';
+                gapsHtml += '<span class="priority-value gaps">' + item.compliance + '%</span>';
+                gapsHtml += '</div>';
+                gapsHtml += '<p class="priority-text gaps">' + item.indicator + '</p>';
+                gapsHtml += '</div>';
+            }
+            document.getElementById('criticalGaps').innerHTML = gapsHtml;
+
+            var strengthsHtml = '';
+            for (var i = 0; i < strengths.length; i++) {
+                var item = strengths[i];
+                strengthsHtml += '<div class="priority-item strengths">';
+                strengthsHtml += '<div class="priority-header">';
+                strengthsHtml += '<span class="priority-element strengths">' + item.element + '</span>';
+                strengthsHtml += '<span class="priority-value strengths">' + item.compliance + '%</span>';
+                strengthsHtml += '</div>';
+                strengthsHtml += '<p class="priority-text strengths">' + item.indicator + '</p>';
+                strengthsHtml += '</div>';
+            }
+            document.getElementById('strengths').innerHTML = strengthsHtml;
+        }
+
+        function filterData() {
+            var elementFilter = document.getElementById('elementFilter').value;
+            var levelFilter = document.getElementById('levelFilter').value;
+
+            filteredData = [];
+            for (var i = 0; i < allIndicators.length; i++) {
+                var item = allIndicators[i];
+                var elementMatch = elementFilter === 'All' || item.element === elementFilter;
+                var levelMatch = levelFilter === 'All' || item.level === levelFilter;
+                if (elementMatch && levelMatch) {
+                    filteredData.push(item);
+                }
+            }
+
+            applySort();
+            renderIndicatorTable();
+        }
+
+        function sortTable(key) {
+            if (sortDirection.key === key) {
+                sortDirection.dir = sortDirection.dir === 'desc' ? 'asc' : 'desc';
+            } else {
+                sortDirection.key = key;
+                sortDirection.dir = 'desc';
+            }
+            applySort();
+            renderIndicatorTable();
+        }
+
+        function applySort() {
+            filteredData.sort(function(a, b) {
+                if (sortDirection.key === 'compliance') {
+                    return sortDirection.dir === 'desc' 
+                        ? b.compliance - a.compliance 
+                        : a.compliance - b.compliance;
+                } else if (sortDirection.key === 'element') {
+                    if (sortDirection.dir === 'desc') {
+                        return b.element > a.element ? 1 : -1;
+                    } else {
+                        return a.element > b.element ? 1 : -1;
+                    }
+                }
+                return 0;
+            });
+        }
+
+        document.getElementById('elementFilter').addEventListener('change', filterData);
+        document.getElementById('levelFilter').addEventListener('change', filterData);
+
+        renderElementTable();
+        renderIndicatorTable();
+        renderPriorities();
+    </script>
+</body>
+</html>
